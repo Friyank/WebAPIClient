@@ -9,9 +9,11 @@ namespace WebApiHelper
     public class AuthenitcateCaller : DelegatingHandler
     {
         private AuthenticationHeaderValue authHeader;
-        public AuthenitcateCaller(string serviceUrl, string clientId, HttpMessageHandler innerHandler, string UserName, string Password)
+        private HttpMethod HttpMethod;
+        public AuthenitcateCaller(string serviceUrl, string clientId, HttpMessageHandler innerHandler, string UserName, string Password, HttpMethod method)
             : base(innerHandler)
         {
+            HttpMethod = method;
             // Obtain the Azure Active Directory Authentication Library (ADAL) authentication context.
             AuthenticationParameters ap = AuthenticationParameters.CreateFromResourceUrlAsync(
                     new Uri(serviceUrl + "api/data/")).Result;
@@ -26,6 +28,7 @@ namespace WebApiHelper
         protected override Task<HttpResponseMessage> SendAsync(
                  HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
         {
+            request.Method = HttpMethod;
             request.Headers.Authorization = authHeader;
             return base.SendAsync(request, cancellationToken);
         }
